@@ -5,3 +5,86 @@ var parser = new OFXDocumentParser();
 var ofxDocument = parser.Import(new FileStream(@"c:\ofxdoc.ofx", FileMode.Open));
 </pre>
 
+h1. Controller
+
+<pre>
+using System.Collections.Generic;
+using System.Web.Mvc;
+using OFXSharp;
+using System.IO;
+
+namespace WebApplication1.Controllers
+{
+    public class HomeController : Controller
+    {
+        public ActionResult Upload()
+        {
+            var parser = new OFXDocumentParser();
+
+            var ofxDocument = parser.Import(new FileStream(@"C:\ofxdoc.ofx", FileMode.Open));
+
+            List<Transaction> TransactionList = new List<Transaction>();
+            for (int i = 0; i < ofxDocument.Transactions.Count; i++)
+            {
+                Transaction transaction = new Transaction
+                {
+                    TransactionID = ofxDocument.Transactions[i].TransactionID,
+                    Date = ofxDocument.Transactions[i].Date,
+                    TransType = ofxDocument.Transactions[i].TransType,
+                    Amount = ofxDocument.Transactions[i].Amount,
+                    Name = ofxDocument.Transactions[i].Name
+                };
+                TransactionList.Add(transaction);
+            }
+            
+            return View(TransactionList);
+        }
+    }
+}
+</pre>
+
+<pre>
+h1. View
+
+@model IEnumerable<OFXSharp.Transaction>
+
+<div id="users">
+    <table></table>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>TransactionID</th>
+            <th>Date</th>
+            <th>TransType</th>
+            <th data-hide="phone,tablet">Amount</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (OFXSharp.Transaction dealership in Model)
+        {
+        <tr>
+            <td>
+                @dealership.TransactionID
+            </td>
+            <td>
+                @dealership.Date
+            </td>
+            <td>
+                @dealership.TransType
+            </td>
+            <td>
+                @dealership.Amount
+            </td>
+            <td>
+                @dealership.Name
+            </td>
+        </tr>
+        }
+
+    </tbody>
+</table>
+
+</pre>
